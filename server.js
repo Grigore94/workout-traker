@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, '/public')));
 let PORT = process.env.PORT || 8080;
 
 
-/******************************* Routes  ****************************/
+/*Routes*/
 
 app.get("/", (req,res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -33,7 +33,7 @@ app.get("/stats", (req,res) => {
   res.sendFile(path.join(__dirname, 'public', 'stats.html'));
 });
 
-/******************************* MiddleWare  ****************************/
+/*MiddleWare*/
 
 
 //GET REQUESTS
@@ -107,7 +107,7 @@ app.post("/api/workouts", (req,res) => {
 
 
 
-/******************************* Connect to db  ****************************/
+/*Connect to db*/
 connectDB()
 
 // Start our server so that it can begin listening to client requests.
