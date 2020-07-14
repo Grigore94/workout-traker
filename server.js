@@ -1,117 +1,26 @@
-// Server Dependencies
 const express = require("express");
-const path = require('path');
-// Database Connection Request
-require('dotenv/config');
-const connectDB = require("./config/connectDB.js");
+const logger = require("morgan");
+const mongoose = require("mongoose");
+const app = express();
+const PORT = process.env.PORT || 8080;
+const apiRoutes = require("./routes/api-routes");
+const htmlRoutes = require("./routes/html-routes");
 
-//Bring in models
-const db = require("./models");
+app.use(logger("dev"));
 
-// Create an instance of the express app.
-let app = express();
-// Added so body parser can handle post requests
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-// Host Static Files so css and js files can be retrieved
-app.use(express.static(path.join(__dirname, '/public')));
-// Set the port of our application, process.env.PORT lets the port be set by Heroku
-let PORT = process.env.PORT || 8080;
 
+app.use(express.static("public"));
 
-/*Routes*/
+app.use(htmlRoutes);
+app.use("/api", apiRoutes);
 
-app.get("/", (req,res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
-app.get("/exercise", (req,res) => {
-    res.sendFile(path.join(__dirname, 'public', 'exercise.html'));
-});
-
-app.get("/stats", (req,res) => {
-  res.sendFile(path.join(__dirname, 'public', 'stats.html'));
-});
-
-/*MiddleWare*/
-
-
-//GET REQUESTS
-
-
-app.get("/api/workouts", (req,res) => {
-  db.Workout.find({}).sort({day:-1}).limit(1)
-  .then(dbWorkout => {
-    res.json(dbWorkout);
-  })
-  .catch(err => {
-    res.json(err);
-  });
-});
-
-app.get("/api/workouts/range", (req,res) => {
-  db.Workout.find({})
-  .then(dbWorkout => {
-    res.json(dbWorkout);
-  })
-  .catch(err => {
-    res.json(err);
-  });
-});
-
-
-
-//PUT REQUESTS
-
-app.put("s/:id", (req,res) => {
-
-let urlData = req.params;
-let data = req.body;
-  db.Workout.updateOne( {_id: urlData.id }, {$push: {exercises:  [
-    {
-    "type" : data.type,
-    "name" : data.name,
-    "duration" : data.duration,
-    "distance" : data.distance,
-    "weight" : data.weight,
-    "reps" : data.reps,
-    "sets" : data.sets
-    }
-  ] 
-}}).then(dbUpdate => {
-  res.json(dbUpdate);
-})
-.catch(err => {
-  res.json(err);
-});
-
-});
-
-
-//POST REQUESTS
-
-app.post("/api/workouts", (req,res) => {
-
-  let data = req.body;
-
-  db.Workout.create({
-    day: new Date().setDate(new Date().getDate())
-}).then(dbUpdate => {
-      res.json(dbUpdate);
-    })
-    .catch(err => {
-      res.json(err);
-    });
-});
-
-
-
-
-/*Connect to db*/
-connectDB()
-
-// Start our server so that it can begin listening to client requests.
-app.listen(PORT, function() {
-  // Log (server-side) when our server has started
+app.listen(PORT, () => {
   console.log("Server listening on: http://localhost:" + PORT);
 });

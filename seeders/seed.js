@@ -3,8 +3,7 @@ let db = require("../models");
 
 mongoose.connect( dbConfig, {
   useNewUrlParser: true,
-  useFindAndModify: false,
-  useUnitfieldTopology: true
+  useFindAndModify: false
 });
 
 let workoutSeed = [
